@@ -43,7 +43,7 @@ func notifyTelegram(event *v1.Event) {
 
 	client := http.Client{}
 
-	req, err := http.NewRequest("POST", telegramApiUrl, bytes.NewBufferString(params.Encode()))
+	req, err := http.NewRequest("POST", telegramApiUrl+"/bot"+botToken+"/sendMessage", bytes.NewBufferString(params.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	_, err = client.Do(req)
 	if err != nil {
