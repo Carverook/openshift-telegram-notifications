@@ -1,24 +1,26 @@
-# OpenShift Slack Notifications
+# OpenShift Telegram Notifications
 
-A project to send OpenShift error messages to a slack channel of your choice.
+A project to send OpenShift error messages to a telegram channel/group of your choice.
 
 ## Cluster Deployment
 
-First create a [Slack Incoming Webhook](https://my.slack.com/services/new/incoming-webhook).
+First create a [Telegram Bot](https://core.telegram.org/bots#6-botfather).
 
 Then deploy this bot to OpenShift with permissions via:
 
 ```shell
 $ oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:<current-project-here>:default --as=system:admin
-$ oc new-app -f https://raw.githubusercontent.com/OutThereLabs/openshift-slack-notifications/master/template.yaml \
-             -p SLACK_WEBHOOK_URL=https://hooks.slack.com/services/<webhook-specifics-here> \
+$ oc new-app -f https://raw.githubusercontent.com/dinhnn/openshift-telegram-notifications/master/template.yaml \
+             -p TELEGRAM_API_URL=https://api.telegram.org \
+             -p TELEGRAM_BOT_TOKEN=<bot-token> \
+             -p TELEGRAM_BOT_CHANNEL=<chat_id of channel or group> \
              -p OPENSHIFT_CONSOLE_URL=https://<openshift-host-here>:8443/console
-$ oc start-build openshift-slack-notifications
+$ oc start-build openshift-telegram-notifications
 ```
 
 Once the app is built and deployed, it will start sending notifications to slack when there are `Warning` type events.
 
-![Slackbot Message](images/slack-bot-message.png)
+![Telegram Message](images/telegram-bot-message.png)
 
 ## Local Development
 
@@ -53,21 +55,4 @@ First add the privileges to mount volumes and read cluster state to your service
 $ oc login -u system:admin
 $ oc adm policy add-scc-to-user hostmount-anyuid system:serviceaccount:myproject:default --as=system:admin
 $ oc adm policy add-cluster-role-to-user cluster-reader system:serviceaccount:myproject:default --as=system:admin
-```
-
-Then create your dev environment via the provided template
-
-```shell
-$ oc process -f debug-template.yaml -v SOURCE_PATH="${PWD}" SLACK_WEBHOOK_URL=<slack-webhook-url-here> OPENSHIFT_CONSOLE_URL=https://<cluster-ip-here>:8443/console | oc create -f -
-$ oc start-build go
-```
-
-### Debugging the app
-
-To run a local copy, start a debug pod
-
-```shell
-$ oc debug dc/go-dev
-$ cd go/github.com/outtherelabs/openshift-slack-notifications && glide up
-$ go run main.go
 ```
