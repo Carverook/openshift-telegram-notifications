@@ -64,6 +64,9 @@ func watchEvents(clientset *kubernetes.Clientset) {
 	for watchEvent := range watcher.ResultChan() {
 		event := watchEvent.Object.(*v1.Event)
 		log.Println("Event")
+		log.Println(event.FirstTimestamp.Time)
+		log.Println(startTime)
+		log.Println(event)
 		if event.FirstTimestamp.Time.After(startTime) {
 			notifyTelegram(event)
 		}
