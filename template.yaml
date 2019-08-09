@@ -1,7 +1,10 @@
 kind: Template
 apiVersion: v1
-labels:
-  template: openshift-telegram-notifications
+metadata:
+  name: openshift-telegram-notifications
+  annotations:
+    description: "openshift-telegram-notifications"
+
 objects:
 - kind: ImageStream
   apiVersion: v1
