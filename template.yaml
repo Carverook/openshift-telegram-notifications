@@ -72,10 +72,14 @@ objects:
         containers:
           - name: ${APPLICATION_NAME}
             env:
-              - name: SLACK_WEBHOOK_URL
-                value: ${SLACK_WEBHOOK_URL}
               - name: OPENSHIFT_CONSOLE_URL
                 value: ${OPENSHIFT_CONSOLE_URL}
+              - name: TELEGRAM_API_URL
+                value: ${TELEGRAM_API_URL}
+              - name: TELEGRAM_BOT_TOKEN
+                value: ${TELEGRAM_BOT_TOKEN}
+              - name: TELEGRAM_CHANNEL
+                value: ${TELEGRAM_CHANNEL}
             image: ' '
             readinessProbe:
               tcpSocket:
