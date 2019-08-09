@@ -1,7 +1,7 @@
 kind: Template
 apiVersion: v1
 labels:
-  template: openshift-slack-notifications
+  template: openshift-telegram-notifications
 objects:
 - kind: ImageStream
   apiVersion: v1
@@ -27,7 +27,7 @@ objects:
     source:
       type: "Git"
       git:
-        uri: "https://github.com/outtherelabs/openshift-slack-notifications"
+        uri: "https://github.com/dinhnn/openshift-telegram-notifications"
     strategy:
       type: Source
       sourceStrategy:
@@ -45,7 +45,7 @@ objects:
   metadata:
     name: ${APPLICATION_NAME}
     annotations:
-      description: Openshift Slack Notifications
+      description: Openshift Telegram Notifications
   spec:
     triggers:
       - type: ConfigChange
@@ -87,12 +87,20 @@ parameters:
   displayName: Application name
   name: APPLICATION_NAME
   required: true
-  value: openshift-slack-notifications
+  value: openshift-telegram-notifications
 - description: Openshift console URL. E.g. http://company.com/console
   displayName: OpenShift Console URL
   name: OPENSHIFT_CONSOLE_URL
   required: true
-- description: The slack webhook url that notifications will be sent to.
-  displayName: Slack Webhook URL
-  name: SLACK_WEBHOOK_URL
+- description: The telegram url that notifications will be sent to.
+  displayName: Telegram Api URL
+  name: TELEGRAM_API_URL
+  required: false
+- description: Telegram Bot Token.
+  displayName: Telegram Bot Token
+  name: TELEGRAM_BOT_TOKEN
+  required: true
+- description: Telegram Channel Name.
+  displayName: Telegram Channel
+  name: TELEGRAM_CHANNEL
   required: true
