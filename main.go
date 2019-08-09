@@ -35,7 +35,7 @@ func notifyTelegram(event *v1.Event) {
 
 	message := event.InvolvedObject.Namespace+" "+monitoringUrl(event)+"\n" +
 		event.InvolvedObject.Name+" "+ resourceUrl(event)+"\n"+
-		event.Message+"\n"+ "Reason: " + event.Reason + "\nKind: " + event.InvolvedObject.Kind
+		event.Message+"\nReason: " + event.Reason + "\nKind: " + event.InvolvedObject.Kind
 	params := url.Values{}
 	params.Add("chat_id",channelName)
 	params.Add("text", message)
