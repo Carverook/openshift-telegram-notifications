@@ -2,12 +2,11 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-
+	"net/url"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/rest"
@@ -15,25 +14,6 @@ import (
 	"time"
 )
 
-type SlackField struct {
-	Title string `json:"title"`
-	Value string `json:"value"`
-	Short bool   `json:"short"`
-}
-
-type SlackAttachment struct {
-	Color      string       `json:"color"`
-	AuthorName string       `json:"author_name"`
-	AuthorLink string       `json:"author_link"`
-	Title      string       `json:"title"`
-	TitleLink  string       `json:"title_link"`
-	Text       string       `json:"text"`
-	Fields     []SlackField `json:"fields"`
-}
-
-type SlackMessage struct {
-	Attachments []SlackAttachment `json:"attachments"`
-}
 
 func resourceUrl(event *v1.Event) string {
 	return os.Getenv("OPENSHIFT_CONSOLE_URL") + "/project/" + event.InvolvedObject.Namespace + "/browse/" + strings.ToLower(event.InvolvedObject.Kind) + "s/" + event.InvolvedObject.Name
@@ -42,40 +22,29 @@ func resourceUrl(event *v1.Event) string {
 func monitoringUrl(event *v1.Event) string {
 	return os.Getenv("OPENSHIFT_CONSOLE_URL") + "project/" + event.InvolvedObject.Namespace + "/monitoring"
 }
+func getEnv(key, fallback string) string {
+    if value, ok := os.LookupEnv(key); ok {
+        return value
+    }
+    return fallback
+}
+func notifyTelegram(event *v1.Event) {
+	telegramApiUrl := getEnv("TELEGRAM_API_URL","https://api.telegram.org")
+	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
+	channelName := os.Getenv("TELEGRAM_CHANNEL")
 
-func notifySlack(event *v1.Event) {
-	webhookUrl := os.Getenv("SLACK_WEBHOOK_URL")
-	message := SlackMessage{
-		Attachments: []SlackAttachment{
-			{
-				Color:      "warning",
-				AuthorName: event.InvolvedObject.Namespace,
-				AuthorLink: monitoringUrl(event),
-				Title:      event.InvolvedObject.Name,
-				TitleLink:  resourceUrl(event),
-				Text:       event.Message,
-				Fields: []SlackField{
-					{
-						Title: "Reason",
-						Value: event.Reason,
-						Short: true,
-					},
-					{
-						Title: "Kind",
-						Value: event.InvolvedObject.Kind,
-						Short: true,
-					},
-				},
-			},
-		},
-	}
-	messageJson, err := json.Marshal(message)
-	if err != nil {
-		panic(err)
-	}
+	message := event.InvolvedObject.Namespace+" "+monitoringUrl(event)+"\n"
+			+ event.InvolvedObject.Name+" "+	resourceUrl(event)+"\n"
+			+ event.Message+"\n"
+			+ "Reason: "+event.Reason+" Kind: "+event.InvolvedObject.Kind;
+	params := url.Values{}
+	params.Add("chat_id",channelName)
+	params.Add("text", message)
+
 	client := http.Client{}
-	req, err := http.NewRequest("POST", webhookUrl, bytes.NewBufferString(string(messageJson)))
-	req.Header.Set("Content-Type", "application/json")
+
+	req, err := http.NewRequest("POST", telegramApiUrl, bytes.NewBufferString(params.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	_, err = client.Do(req)
 	if err != nil {
 		fmt.Println("Unable to reach the server.")
@@ -94,7 +63,7 @@ func watchEvents(clientset *kubernetes.Clientset) {
 	for watchEvent := range watcher.ResultChan() {
 		event := watchEvent.Object.(*v1.Event)
 		if event.FirstTimestamp.Time.After(startTime) {
-			notifySlack(event)
+			notifyTelegram(event)
 		}
 	}
 }
