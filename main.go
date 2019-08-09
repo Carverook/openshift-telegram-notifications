@@ -33,10 +33,10 @@ func notifyTelegram(event *v1.Event) {
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 	channelName := os.Getenv("TELEGRAM_CHANNEL")
 
-	message := string(event.InvolvedObject.Namespace)+" "+monitoringUrl(event)+"\n"
-	+ string(event.InvolvedObject.Name)+" "+ resourceUrl(event)+"\n"
-	+ string(event.Message)+"\n"
-	+ "Reason: " + string(event.Reason) + " Kind: " + string(event.InvolvedObject.Kind)
+	message := event.InvolvedObject.Namespace+" "+monitoringUrl(event)+"\n" +
+		event.InvolvedObject.Name)+" "+ resourceUrl(event)+"\n"+
+		event.Message)+"\n"+
+		"Reason: " + event.Reason + " Kind: " + event.InvolvedObject.Kind
 	params := url.Values{}
 	params.Add("chat_id",channelName)
 	params.Add("text", message)
