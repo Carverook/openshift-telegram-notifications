@@ -34,7 +34,7 @@ func notifyTelegram(event *v1.Event) {
 	channelName := os.Getenv("TELEGRAM_CHANNEL")
 
 	message := event.InvolvedObject.Namespace+" "+monitoringUrl(event)+"\n" +
-		event.InvolvedObject.Name)+" "+ resourceUrl(event)+"\n"+
+		event.InvolvedObject.Name+" "+ resourceUrl(event)+"\n"+
 		event.Message)+"\n"+
 		"Reason: " + event.Reason + " Kind: " + event.InvolvedObject.Kind
 	params := url.Values{}
