@@ -41,8 +41,6 @@ func notifyTelegram(event *v1.Event) {
 	params.Add("text", message)
 
 	client := http.Client{}
-	log.Println(telegramApiUrl+"/bot"+botToken+"/sendMessage")
-	log.Println(params.Encode())
 	
 	req, err := http.NewRequest("POST", telegramApiUrl+"/bot"+botToken+"/sendMessage", bytes.NewBufferString(params.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -63,10 +61,6 @@ func watchEvents(clientset *kubernetes.Clientset) {
 
 	for watchEvent := range watcher.ResultChan() {
 		event := watchEvent.Object.(*v1.Event)
-		log.Println("Event")
-		log.Println(event.FirstTimestamp.Time)
-		log.Println(startTime)
-		log.Println(event)
 		if event.FirstTimestamp.Time.After(startTime) {
 			notifyTelegram(event)
 		}
