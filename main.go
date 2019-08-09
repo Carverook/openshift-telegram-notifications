@@ -20,7 +20,7 @@ func resourceUrl(event *v1.Event) string {
 }
 
 func monitoringUrl(event *v1.Event) string {
-	return os.Getenv("OPENSHIFT_CONSOLE_URL") + "project/" + event.InvolvedObject.Namespace + "/monitoring"
+	return os.Getenv("OPENSHIFT_CONSOLE_URL") + "/project/" + event.InvolvedObject.Namespace + "/monitoring"
 }
 func getEnv(key, fallback string) string {
     if value, ok := os.LookupEnv(key); ok {
@@ -33,9 +33,9 @@ func notifyTelegram(event *v1.Event) {
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 	channelName := os.Getenv("TELEGRAM_CHANNEL")
 
-	message := event.InvolvedObject.Namespace+" "+monitoringUrl(event)+"\n" +
-		event.InvolvedObject.Name+" "+ resourceUrl(event)+"\n"+
-		event.Message+"\nReason: " + event.Reason + "\nKind: " + event.InvolvedObject.Kind
+	message := "Project: "+event.InvolvedObject.Namespace+" "+monitoringUrl(event)+"\n" +
+	event.InvolvedObject.Kind + ": " + event.InvolvedObject.Name+" "+ resourceUrl(event)+"\n"+
+		event.Message+"\nReason: " + event.Reason
 	params := url.Values{}
 	params.Add("chat_id",channelName)
 	params.Add("text", message)
