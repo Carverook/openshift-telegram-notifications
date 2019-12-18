@@ -32,8 +32,8 @@ func notifyTelegram(event *v1.Event) {
 	telegramApiUrl := getEnv("TELEGRAM_API_URL","https://api.telegram.org")
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 	channelName := os.Getenv("TELEGRAM_CHANNEL_"+strings.ToUpper(strings.Replace(event.InvolvedObject.Namespace,"-","_",0)))
-	if(channelName == nil){
-		channelName := os.Getenv("TELEGRAM_CHANNEL")
+	if  len(channelName) == 0){
+		channelName = os.Getenv("TELEGRAM_CHANNEL")
 	}
 	message := "Project: "+event.InvolvedObject.Namespace+" "+monitoringUrl(event)+"\n" +
 	event.InvolvedObject.Kind + ": " + event.InvolvedObject.Name+" "+ resourceUrl(event)+"\n"+
