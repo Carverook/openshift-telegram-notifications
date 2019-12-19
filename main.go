@@ -31,7 +31,7 @@ func getEnv(key, fallback string) string {
 func notifyTelegram(event *v1.Event) {
 	telegramApiUrl := getEnv("TELEGRAM_API_URL","https://api.telegram.org")
 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
-	channelName := os.Getenv("TELEGRAM_CHANNEL_"+strings.ToUpper(strings.Replace(event.InvolvedObject.Namespace,"-","_",-1)))
+	channelName := os.Getenv("TELEGRAM_CHANNEL_"+strings.ToUpper(strings.ReplaceAll(event.InvolvedObject.Namespace,"-","_")))
 	if len(channelName) == 0 {
 		channelName = os.Getenv("TELEGRAM_CHANNEL")
 	}
