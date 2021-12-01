@@ -1,0 +1,113 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: openshift-telegram-notifications
+  annotations:
+    description: "openshift-telegram-notifications"
+
+objects:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: go
+  spec:
+    tags:
+    - from:
+        kind: DockerImage
+        name: jatescher/s2i-go:latest
+      name: latest
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: ${APPLICATION_NAME}
+
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: ${APPLICATION_NAME}
+  spec:
+    source:
+      type: "Git"
+      git:
+        uri: "https://github.com/dinhnn/openshift-telegram-notifications"
+    strategy:
+      type: Source
+      sourceStrategy:
+          from:
+            kind: ImageStreamTag
+            name: "go:latest"
+          incremental: true
+    output:
+      to:
+        kind: "ImageStreamTag"
+        name: "${APPLICATION_NAME}:latest"
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: ${APPLICATION_NAME}
+    annotations:
+      description: Openshift Telegram Notifications
+  spec:
+    triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+            - ${APPLICATION_NAME}
+          from:
+            kind: "ImageStreamTag"
+            name: ${APPLICATION_NAME}:latest
+    replicas: 1
+    selector:
+      name: ${APPLICATION_NAME}
+    template:
+      metadata:
+        name: ${APPLICATION_NAME}
+        labels:
+          name: ${APPLICATION_NAME}
+      spec:
+        containers:
+          - name: ${APPLICATION_NAME}
+            env:
+              - name: OPENSHIFT_CONSOLE_URL
+                value: ${OPENSHIFT_CONSOLE_URL}
+              - name: TELEGRAM_API_URL
+                value: ${TELEGRAM_API_URL}
+              - name: TELEGRAM_BOT_TOKEN
+                value: ${TELEGRAM_BOT_TOKEN}
+              - name: TELEGRAM_CHANNEL
+                value: ${TELEGRAM_CHANNEL}
+            image: ' '
+            readinessProbe:
+              tcpSocket:
+                  port: 8080
+              initialDelaySeconds: 60
+              timeoutSeconds: 1
+            stdin: true
+            tty: true
+
+parameters:
+- description: The name of the environment
+  displayName: Application name
+  name: APPLICATION_NAME
+  required: true
+  value: openshift-telegram-notifications
+- description: Openshift console URL. E.g. http://company.com/console
+  displayName: OpenShift Console URL
+  name: OPENSHIFT_CONSOLE_URL
+  required: true
+- description: The telegram url that notifications will be sent to.
+  displayName: Telegram Api URL
+  name: TELEGRAM_API_URL
+  required: false
+- description: Telegram Bot Token.
+  displayName: Telegram Bot Token
+  name: TELEGRAM_BOT_TOKEN
+  required: true
+- description: Telegram Channel Name.
+  displayName: Telegram Channel
+  name: TELEGRAM_CHANNEL
+  required: true
